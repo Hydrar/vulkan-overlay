@@ -32,13 +32,14 @@ masters = gentoo
 auto-sync = no
 ```
 
-## Issues
-
 ### x11-drivers/amdgpu-pro
 
-This still doesn't work. The system fails to find ```gbm_amdgpu.so```, even though I hacked in a symlink into the lib dir.
+This is the set of libraries, GL, EGL, GLX, GBM, Vulkan, OpenCL, VDPAU, etc.
 
-It does't change the OpenGL/OpenGL implementations. You have to eselect these yourself.
+### sys-kernel/amdgpu-pro-dkms
+
+This is the kernel module source for the hybrid stack, this has extra ioctl's that are required for the rest of the
+stack. Tested on 4.6-rc7. The X log indicates that the kernel module is working.
 
 ## Roadmap
 
