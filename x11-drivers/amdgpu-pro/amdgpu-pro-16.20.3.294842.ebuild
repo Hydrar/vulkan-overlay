@@ -108,6 +108,7 @@ src_prepare() {
 		unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dev_${BUILD_VER}_amd64.deb"
 		unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dri_${BUILD_VER}_amd64.deb"
 		unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-glx_${BUILD_VER}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/libdrm-amdgpu-pro-amdgpu1_${BUILD_VER}_amd64.deb"
 
 		# Install the Generic Buffer Management (BGM) library
 		# TODO: This is going to require that the eselect program moves the gbm libs
@@ -117,6 +118,7 @@ src_prepare() {
 			unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dev_${BUILD_VER}_i386.deb"
 			unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dri_${BUILD_VER}_i386.deb"
 			unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-glx_${BUILD_VER}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/libdrm-amdgpu-pro-amdgpu1_${BUILD_VER}_i386.deb"
 
 			# Install the Generic Buffer Management (BGM) library
 			# TODO: This is going to require that the eselect program moves the gbm libs
@@ -263,16 +265,18 @@ EOF
 
 	if use opengl ; then
 		mkdir -p ./inst/usr/$(get_libdir)/dri
+		mkdir -p ./inst/usr/$(get_libdir)/x86_64-linux-gnu/dri   # Hack to get X to started!
 		mkdir -p ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/{dri,gbm,lib,extensions}
 		mkdir -p ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/modules/drivers
 
 		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/libGL.so.1.2 ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib
+		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/libdrm_amdgpu.so.1.0.0 ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib
 		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/libgbm.so.1.0.0 ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib
 		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/gbm/gbm_amdgpu.so ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/gbm
 		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/${XORG_VERS}/modules/extensions/libglx.so ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/extensions
 		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/${XORG_VERS}/modules/drivers/* ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/modules/drivers
 		cp -a ./usr/lib/x86_64-linux-gnu/dri/amdgpu_dri.so ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/dri
-		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib/{libGL.so.1.2,libgbm.so.1.0.0}
+		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib/{libGL.so.1.2,libdrm_amdgpu.so.1.0.0,libgbm.so.1.0.0}
 		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/gbm/gbm_amdgpu.so
 		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/extensions/libglx.so
 		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/modules/drivers/amdgpu_drv.so
@@ -280,7 +284,9 @@ EOF
 
 		pushd ./inst/usr/$(get_libdir)/dri > /dev/null
 			ln -s ../opengl/amdgpu-pro/dri/amdgpu_dri.so amdgpu_dri.so
-			cd ..
+			cd ../x86_64-linux-gnu/dri
+			ln -s ../../dri/amdgpu_dri.so amdgpu_dri.so
+			cd ../..
 			ln -s ./opengl/amdgpu-pro/gbm gbm
 		popd > /dev/null
 
@@ -288,19 +294,23 @@ EOF
 			ln -s libGL.so.1.2 libGL.so.1
 			ln -s libGL.so.1.2 libGL.so
 			ln -s libgbm.so.1.0.0 libgbm.so.1
+			ln -s libdrm_amdgpu.so.1.0.0 libdrm_amdgpu.so.1
+			ln -s libdrm_amdgpu.so.1.0.0 libdrm_amdgpu.so
 			cd ../gbm
 			ln -s gbm_amdgpu.so libdummy.so
 		popd > /dev/null
 
 		if use abi_x86_32 ; then
 			mkdir -p ./inst/usr/lib32/dri
+			mkdir -p ./inst/usr/$(get_libdir)/i386-linux-gnu/dri   # Hack to get X to started!
 			mkdir -p ./inst/usr/lib32/opengl/amdgpu-pro/{dri,gbm,lib}
 
 			cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/libGL.so.1.2 ./inst/usr/lib32/opengl/amdgpu-pro/lib
+			cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/libdrm_amdgpu.so.1.0.0 ./inst/usr/lib32/opengl/amdgpu-pro/lib
 			cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/libgbm.so.1.0.0 ./inst/usr/lib32/opengl/amdgpu-pro/lib
 			cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/gbm/gbm_amdgpu.so ./inst/usr/lib32/opengl/amdgpu-pro/gbm
 			cp -a ./usr/lib/i386-linux-gnu/dri/amdgpu_dri.so ./inst/usr/lib32/opengl/amdgpu-pro/dri
-			chmod a+x ./inst/usr/lib32/opengl/amdgpu-pro/lib/{libGL.so.1.2,libgbm.so.1.0.0}
+			chmod a+x ./inst/usr/lib32/opengl/amdgpu-pro/lib/{libGL.so.1.2,libdrm_amdgpu.so.1.0.0,libgbm.so.1.0.0}
 			chmod a+x ./inst/usr/lib32/opengl/amdgpu-pro/gbm/gbm_amdgpu.so
 			chmod a+x ./inst/usr/lib32/opengl/amdgpu-pro/dri/amdgpu_dri.so
 
@@ -310,9 +320,16 @@ EOF
 				ln -s ./opengl/amdgpu-pro/gbm gbm
 			popd > /dev/null
 
+			# Hack to get X to started!
+			pushd ./inst/usr/$(get_libdir)/i386-linux-gnu/dri > /dev/null
+				ln -s ../../../lib32/opengl/amdgpu-pro/dri/amdgpu_dri.so amdgpu_dri.so
+			popd > /dev/null
+
 			pushd ./inst/usr/lib32/opengl/amdgpu-pro/lib > /dev/null
 				ln -s libGL.so.1.2 libGL.so.1
 				ln -s libGL.so.1.2 libGL.so
+				ln -s libdrm_amdgpu.so.1.0.0 libdrm_amdgpu.so.1
+				ln -s libdrm_amdgpu.so.1.0.0 libdrm_amdgpu.so
 				ln -s libgbm.so.1.0.0 libgbm.so.1
 				cd ../gbm
 				ln -s gbm_amdgpu.so libdummy.so
