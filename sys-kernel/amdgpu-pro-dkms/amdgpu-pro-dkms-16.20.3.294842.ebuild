@@ -5,8 +5,7 @@
 EAPI=5
 
 MULTILIB_COMPAT=( abi_x86_{32,64} )
-#inherit eutils linux-info multilib-build unpacker
-inherit eutils multilib-build unpacker
+inherit eutils linux-info multilib-build unpacker
 
 DESCRIPTION="AMD GPU-Pro kernel module for Radeon Evergreen (HD5000 Series) and newer chipsets"
 HOMEPAGE="http://support.amd.com/en-us/kb-articles/Pages/AMDGPU-PRO-Beta-Driver-for-Vulkan-Release-Notes.aspx"
@@ -43,6 +42,8 @@ unpack_deb() {
 }
 
 src_prepare() {
+	linux-info_pkg_setup
+
 	unpack_deb "./amdgpu-pro-driver/amdgpu-pro-dkms_${BUILD_VER}_all.deb"
 
 	pushd ./usr/src/amdgpu-pro-${BUILD_VER} > /dev/null
@@ -59,10 +60,21 @@ src_prepare() {
 
 src_install() {
 	cp -R -t "${D}" ./inst/* || die "Install failed!"
+}
 
+pkg_postinst() {
 	einfo "To install the kernel module, you need to do the following:"
 	einfo ""
-	einfo "  dkms add -m amdgpu-pro -v ${BUILD_VER} ./usr/src/amdgpu-pro-${BUILD_VER}"
+	einfo "  dkms add -m amdgpu-pro -v ${BUILD_VER}"
 	einfo "  dkms build -m amdgpu-pro -v ${BUILD_VER}"
 	einfo "  dkms install -m amdgpu-pro -v ${BUILD_VER}"
+}
+
+pkg_postrm() {
+	einfo "If you have built and installed the kernel module, to remove it, you need to do the following:"
+	einfo ""
+	einfo "  dkms remove -m amdgpu -v ${BUILD_VER} -k ${KV_FULL}"
+	einfo ""
+	einfo "If you haven't, just:"
+	einfo "  rm -rf /var/lib/dkms/amdgpu-pro"
 }
