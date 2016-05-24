@@ -20,6 +20,10 @@ LICENSE="AMD GPL-2 QPL-1.0"
 KEYWORDS=""
 SLOT="1"
 
+RDEPEND="
+	sys-kernel/dkms
+"
+
 S="${WORKDIR}"
 
 pkg_nofetch() {
