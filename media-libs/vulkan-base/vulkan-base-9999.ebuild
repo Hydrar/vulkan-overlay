@@ -65,7 +65,7 @@ src_compile() {
 src_install() {
 	mkdir -p "${D}"/{etc,usr/share}/vulkan/{icd.d,implicit_layer.d,explicit_layer.d}
 	mkdir -p "${D}"/usr/share/vulkan/demos/{cube,tri,smoke}
-	mkdir -p "${D}"/usr/$(get_libdir)/vulkan/layers
+	mkdir -p "${D}"/usr/$(get_libdir)/vulkan
 	mkdir -p "${D}"/usr/{bin,include}
 	mkdir -p "${D}"/etc/env.d
 
@@ -75,7 +75,7 @@ src_install() {
 	cp -a "${S}"/sdk/build/demos/cube* "${D}"/{etc,usr/share}/vulkan/demos/cube
 	cp -a "${S}"/sdk/demos/cube.{c,vert,frag} "${D}"/{etc,usr/share}/vulkan/demos/cube
 	cp -a "${S}"/sdk/build/demos/tri* "${D}"/{etc,usr/share}/vulkan/demos/tri
-	cp -a "${S}"/sdk/build/demos/tri.{c,vert,frag} "${D}"/{etc,usr/share}/vulkan/demos/tri
+	cp -a "${S}"/sdk/demos/tri.{c,vert,frag} "${D}"/{etc,usr/share}/vulkan/demos/tri
 	cp -a "${S}"/sdk/build/demos/smoketest "${D}"/{etc,usr/share}/vulkan/demos/smoke
 	#dobin "${S}"/sdk/build/demos/vulkan{info,cube,tri}
 	dobin "${S}"/sdk/build/demos/vulkaninfo
@@ -88,7 +88,7 @@ src_install() {
 	dolib.so "${S}"/sdk/build/loader/lib*.so*
 
 	# vulkan validation layers
-	exeinto /usr/$(get_libdir)/vulkan/layers
+	exeinto /usr/$(get_libdir)/vulkan
 	doexe "${S}"/sdk/build/layers/libVk*.so*
 
 	# layer json files
@@ -102,7 +102,7 @@ src_install() {
 
 	# point linker to newly created vulkan layer libs
 	cat << EOF > "${D}"/etc/env.d/89vulkan
-LDPATH="/usr/$(get_libdir)/vulkan/layers;"
+LDPATH="/usr/$(get_libdir)/vulkan;"
 EOF
 }
 
