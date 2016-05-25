@@ -48,6 +48,22 @@ stack. Tested on 4.6-rc7. The X log indicates that the kernel module is working.
 This installs a basic SDK, taken from [here](https://bugs.gentoo.org/show_bug.cgi?id=574886), it's the v2 ebuild. It's
 a start, but it needs a lot more work. See below.
 
+## Vulkan
+
+IMPORTANT! To get Vulkan to work, you need to set DRI to 3! i.e. my ```/etc/X11/xorg.conf.d/10-device.conf```:
+
+```bash
+Section "Device"
+	Identifier  "AMD Radeon R9 390 (Hawaii)"
+	Driver      "amdgpu"
+	BusID       "PCI:1:0:0"
+	Option      "DRI"         "3"
+	Option      "AccelMethod" "glamor"
+EndSection
+```
+
+TODO: Add this into the base config.
+
 ## Roadmap
 
 This what I really want to happen:
