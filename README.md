@@ -10,6 +10,8 @@ See the [issues](https://github.com/Lucretia/vulkan-overlay/issues) before attem
 
 You mess about with this at your own risk. I will not be held responsible for any system problems caused by this.
 
+These scripts currently do **no** error checking and may fail silently.
+
 ## To download
 
 Find a place to put the overlay and clone it, but name it *vulkan*, this is the name of the overlay, not *vulkan-overlay*. I
