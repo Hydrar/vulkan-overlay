@@ -2,11 +2,11 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI=5
+EAPI=6
 
 MULTILIB_COMPAT=( abi_x86_{32,64} )
 #inherit eutils linux-info multilib-build unpacker
-inherit eutils multilib-build unpacker
+inherit multilib-build unpacker
 
 DESCRIPTION="AMD precompiled drivers for Radeon Evergreen (HD5000 Series) and newer chipsets"
 HOMEPAGE="http://support.amd.com/en-us/kb-articles/Pages/AMDGPU-PRO-Beta-Driver-for-Vulkan-Release-Notes.aspx"
@@ -20,7 +20,7 @@ RESTRICT="fetch strip"
 IUSE="gles2 opencl +opengl vdpau +vulkan"
 
 LICENSE="AMD GPL-2 QPL-1.0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 SLOT="1"
 
 RDEPEND="
@@ -31,15 +31,13 @@ RDEPEND="
 	x11-libs/libXinerama[${MULTILIB_USEDEP}]
 	x11-libs/libXrandr[${MULTILIB_USEDEP}]
 	x11-libs/libXrender[${MULTILIB_USEDEP}]
-"
-
-DEPEND="${RDEPEND}
 	x11-proto/inputproto
 	x11-proto/xf86miscproto
 	x11-proto/xf86vidmodeproto
 	x11-proto/xineramaproto
 	sys-kernel/amdgpu-pro-dkms
 "
+DEPEND=""
 
 S="${WORKDIR}"
 
@@ -48,10 +46,6 @@ pkg_nofetch() {
 	einfo "  - ${PN}_${PV}.tar.xz"
 	einfo "from ${HOMEPAGE} and place them in ${DISTDIR}"
 }
-
-#src_unpack() {
-#        unpack ${A}
-#}
 
 unpack_deb() {
 	echo ">>> Unpacking ${1##*/} to ${PWD}"
@@ -63,8 +57,8 @@ unpack_deb() {
 	rm -f debian-binary {control,data}.tar*
 }
 
-src_prepare() {
-	# linux-info_pkg_setup
+src_unpack() {
+	default
 
 	unpack_deb "./amdgpu-pro-driver/amdgpu-pro-core_${BUILD_VER}_amd64.deb"
 	unpack_deb "./amdgpu-pro-driver/amdgpu-pro-graphics_${BUILD_VER}_amd64.deb"
@@ -156,36 +150,33 @@ src_prepare() {
 
 	# Install the DKMS sources.
 	# unpack_deb "./amdgpu-pro-driver/amdgpu-pro-dkms_${BUILD_VER}_all.deb"
+}
 
+src_prepare() {
 	# pushd ./usr/src/amdgpu-pro-${BUILD_VER} > /dev/null
 	# 	epatch "${FILESDIR}"/0001-Make-the-script-find-the-correct-system-map-file.patch
 	# 	epatch "${FILESDIR}"/0002-Add-in-Gentoo-as-an-option-for-the-OS-otherwise-it-w.patch
 	# 	epatch "${FILESDIR}"/0003-Fixed-API-changes-in-the-kernel.-Should-still-compil.patch
 	# 	epatch "${FILESDIR}"/0004-GCC-won-t-compile-any-static-inline-function-with-va.patch
 	# popd > /dev/null
-
-	# Make our new dir tree
-
-	# Misc
-	mkdir -p ./inst/etc/{amd,gbm,ld.so.conf.d}
-	mkdir -p ./inst/etc/X11/xorg.conf.d
-	mkdir -p ./inst/usr/bin
-	mkdir -p ./inst/usr/$(get_libdir)
-	mkdir -p ./inst/usr/share/man/man4
-
-	cp ./usr/share/man/amdgpu-pro.4/amdgpu.4.gz ./inst/usr/share/man/man4/amdgpu-pro.4.gz
-	cp -a ./usr/bin/{amdgpu_test,kmstest,modeprint,modetest,proptest,vbltest} ./inst/usr/bin
-	cp -R ./etc/amd/* ./inst/etc/amd
-	cp -R ./etc/gbm/* ./inst/etc/gbm
-	chmod a-x ./inst/etc/{amd,gbm}/*
-
-cat << EOF > ./inst/etc/ld.so.conf.d/01-amdgpu-pro.conf
+	cat << EOF > "${T}/01-amdgpu-pro.conf" || die
 /usr/$(get_libdir)/gbm
 /usr/lib32/gbm
 EOF
 
-cat << EOF > ./inst/etc/X11/xorg.conf.d/10-screen.conf
+	cat << EOF > "${T}/10-device.conf" || die
+Section "Device"
+	Identifier  "Name of your GPU"
+	Driver      "amdgpu"
+	BusID       "PCI:1:0:0"
+	Option      "DRI"         "3"
+	Option      "AccelMethod" "glamor"
+EndSection
+EOF
+
+	cat << EOF > "${T}/10-screen.conf" || die
 Section "Screen"
+		Identifier      "Your screen name"
 		DefaultDepth    24
 		SubSection      "Display"
 				Depth   24
@@ -193,41 +184,17 @@ Section "Screen"
 EndSection
 EOF
 
-	# Copy the OpenCL libs
-	if use opencl ; then
-		mkdir -p ./inst/etc/OpenCL/vendors
-		mkdir -p ./inst/usr/$(get_libdir)/OpenCL/vendors/amdgpu-pro
+	cat << EOF > "${T}/10-monitor.conf" || die
+Section "Monitor"
+	Identifier   "Your monitor name"
+	VendorName   "The make"
+	ModelName    "The model"
+	Option       "DPMS"   "true" # Might want to turn this off if using an R9 390
+EndSection
+EOF
 
-		cp -a ./etc/OpenCL/vendors/amdocl64.icd ./inst/etc/OpenCL/vendors
-		cp -a ./usr/bin/clinfo ./inst/usr/bin
-		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/libOpenCL.so.1 ./inst/usr/$(get_libdir)/OpenCL/vendors/amdgpu-pro/
-		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/libamdocl* ./inst/usr/$(get_libdir)/OpenCL/vendors/amdgpu-pro/
-		chmod a+x ./inst/usr/$(get_libdir)/OpenCL/vendors/amdgpu-pro/{libamdocl12cl64.so,libamdocl64.so,libOpenCL.so.1}
-
-		pushd ./inst/usr/$(get_libdir)/OpenCL/vendors/amdgpu-pro > /dev/null
-			ln -s libOpenCL.so.1 libOpenCL.so
-		popd > /dev/null
-
-		if use abi_x86_32 ; then
-			mkdir -p ./inst/usr/lib32/OpenCL/vendors/amdgpu-pro
-
-			cp -a ./etc/OpenCL/vendors/amdocl32.icd ./inst/etc/OpenCL/vendors
-			cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/libOpenCL.so.1 ./inst/usr/lib32/OpenCL/vendors/amdgpu-pro/
-			cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/libamdocl* ./inst/usr/lib32/OpenCL/vendors/amdgpu-pro/
-			chmod a+x ./inst/usr/lib32/OpenCL/vendors/amdgpu-pro/{libamdocl12cl32.so,libamdocl32.so,libOpenCL.so.1}
-
-			pushd ./inst/usr/lib32/OpenCL/vendors/amdgpu-pro > /dev/null
-				ln -s libOpenCL.so.1 libOpenCL.so
-			popd > /dev/null
-		fi
-	fi
-
-	# Copy the Vulkan libs
 	if use vulkan ; then
-		mkdir -p ./inst/etc/vulkan/icd.d
-		mkdir -p ./inst/usr/$(get_libdir)/vulkan/vendors/amdgpu-pro
-
-cat << EOF > ./inst/etc/vulkan/icd.d/amd_icd64.json
+		cat << EOF > "${T}/amd_icd64.json" || die
 {
    "file_format_version": "1.0.0",
 	   "ICD": {
@@ -237,13 +204,8 @@ cat << EOF > ./inst/etc/vulkan/icd.d/amd_icd64.json
 }
 EOF
 
-		cp -a ./usr/lib/x86_64-linux-gnu/amdvlk64.so ./inst/usr/$(get_libdir)/vulkan/vendors/amdgpu-pro
-		chmod a+x ./inst/usr/$(get_libdir)/vulkan/vendors/amdgpu-pro/amdvlk64.so
-
 		if use abi_x86_32 ; then
-			mkdir -p ./inst/usr/lib32/vulkan/vendors/amdgpu-pro
-
-cat << EOF > ./inst/etc/vulkan/icd.d/amd_icd32.json
+			cat << EOF > "${T}/amd_icd32.json" || die
 {
    "file_format_version": "1.0.0",
 	   "ICD": {
@@ -252,141 +214,155 @@ cat << EOF > ./inst/etc/vulkan/icd.d/amd_icd32.json
 	   }
 }
 EOF
+		fi
+	fi
 
-			cp -a ./usr/lib/i386-linux-gnu/amdvlk32.so ./inst/usr/lib32/vulkan/vendors/amdgpu-pro/
-			chmod a+x ./inst/usr/lib32/vulkan/vendors/amdgpu-pro/amdvlk32.so
+	eapply_user
+}
+
+src_install() {
+	# Make our new dir tree
+
+	newman usr/share/man/amdgpu-pro.4/amdgpu.4.gz amdgpu-pro.4.gz
+	dobin usr/bin/{amdgpu_test,kmstest,modeprint,modetest,proptest,vbltest}
+	insinto /etc
+	doins -r etc/{amd,gbm}
+
+	insinto /etc/ld.so.conf.d
+	doins "${T}/01-amdgpu-pro.conf"
+
+	insinto /etc/X11/xorg.conf.d
+	doins "${T}/10-screen.conf"
+	doins "${T}/10-monitor.conf"
+	doins "${T}/10-device.conf"
+
+	# Copy the OpenCL libs
+	if use opencl ; then
+		insinto /etc/OpenCL/vendors
+		doins etc/OpenCL/vendors/amdocl64.icd
+		dobin usr/bin/clinfo
+		exeinto /usr/$(get_libdir)/OpenCL/vendors/amdgpu-pro
+		doexe usr/lib/x86_64-linux-gnu/amdgpu-pro/libamdocl*
+		doexe usr/lib/x86_64-linux-gnu/amdgpu-pro/libOpenCL.so.1
+		dosym libOpenCL.so.1 /usr/$(get_libdir)/OpenCL/vendors/amdgpu-pro/libOpenCL.so
+
+		if use abi_x86_32 ; then
+			insinto /etc/OpenCL/vendors
+			doins etc/OpenCL/vendors/amdocl32.icd
+			exeinto /usr/lib32/OpenCL/vendors/amdgpu-pro
+			doexe usr/lib/i386-linux-gnu/amdgpu-pro/libamdocl*
+			doexe usr/lib/i386-linux-gnu/amdgpu-pro/libOpenCL.so.1
+			dosym libOpenCL.so.1 /usr/lib32/OpenCL/vendors/amdgpu-pro/libOpenCL.so
+		fi
+	fi
+
+	# Copy the Vulkan libs
+	if use vulkan ; then
+		insinto /etc/vulkan/icd.d
+		doins "${T}/amd_icd64.json"
+		exeinto /usr/$(get_libdir)/vulkan/vendors/amdgpu-pro
+		doexe usr/lib/x86_64-linux-gnu/amdvlk64.so
+
+		if use abi_x86_32 ; then
+			insinto /etc/vulkan/icd.d
+			doins "${T}/amd_icd32.json"
+			exeinto /usr/lib32/vulkan/vendors/amdgpu-pro
+			doexe usr/lib/i386-linux-gnu/amdvlk32.so
 		fi
 	fi
 
 	# Copy the OpenGL libs
 	local XORG_VERS=`Xorg -version 2>&1 | awk '/X.Org X Server/ {print $NF}'|sed 's/.\{2\}$//'`
 
-	mkdir -p ./inst/usr/$(get_libdir)/opengl/amdgpu-pro
-
 	if use opengl ; then
-		mkdir -p ./inst/usr/$(get_libdir)/dri
-		mkdir -p ./inst/usr/$(get_libdir)/x86_64-linux-gnu/dri   # Hack to get X to started!
-		mkdir -p ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/{dri,gbm,lib,extensions}
-		mkdir -p ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/modules/drivers
+		exeinto /usr/$(get_libdir)/opengl/amdgpu-pro/lib
+		doexe usr/lib/x86_64-linux-gnu/amdgpu-pro/libdrm_amdgpu.so.1.0.0
+		dosym libdrm_amdgpu.so.1.0.0 /usr/$(get_libdir)/opengl/amdgpu-pro/lib/libdrm_amdgpu.so.1
+		dosym libdrm_amdgpu.so.1.0.0 /usr/$(get_libdir)/opengl/amdgpu-pro/lib/libdrm_amdgpu.so
 
-		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/libGL.so.1.2 ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib
-		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/libdrm_amdgpu.so.1.0.0 ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib
-		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/libgbm.so.1.0.0 ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib
-		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/gbm/gbm_amdgpu.so ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/gbm
-		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/${XORG_VERS}/modules/extensions/libglx.so ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/extensions
-		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/${XORG_VERS}/modules/drivers/* ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/modules/drivers
-		cp -a ./usr/lib/x86_64-linux-gnu/dri/amdgpu_dri.so ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/dri
-		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib/{libGL.so.1.2,libdrm_amdgpu.so.1.0.0,libgbm.so.1.0.0}
-		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/gbm/gbm_amdgpu.so
-		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/extensions/libglx.so
-		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/modules/drivers/amdgpu_drv.so
-		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/dri/amdgpu_dri.so
+		doexe usr/lib/x86_64-linux-gnu/amdgpu-pro/libGL.so.1.2
+		dosym libGL.so.1.2 /usr/$(get_libdir)/opengl/amdgpu-pro/lib/libGL.so.1
+		dosym libGL.so.1.2 /usr/$(get_libdir)/opengl/amdgpu-pro/lib/libGL.so
 
-		pushd ./inst/usr/$(get_libdir)/dri > /dev/null
-			ln -s ../opengl/amdgpu-pro/dri/amdgpu_dri.so amdgpu_dri.so
-			cd ../x86_64-linux-gnu/dri
-			ln -s ../../dri/amdgpu_dri.so amdgpu_dri.so
-			cd ../..
-			ln -s ./opengl/amdgpu-pro/gbm gbm
-		popd > /dev/null
+		doexe usr/lib/x86_64-linux-gnu/amdgpu-pro/libgbm.so.1.0.0
+		dosym libgbm.so.1.0.0 /usr/$(get_libdir)/opengl/amdgpu-pro/lib/libgbm.so.1
 
-		pushd ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib > /dev/null
-			ln -s libGL.so.1.2 libGL.so.1
-			ln -s libGL.so.1.2 libGL.so
-			ln -s libgbm.so.1.0.0 libgbm.so.1
-			ln -s libdrm_amdgpu.so.1.0.0 libdrm_amdgpu.so.1
-			ln -s libdrm_amdgpu.so.1.0.0 libdrm_amdgpu.so
-			cd ../gbm
-			ln -s gbm_amdgpu.so libdummy.so
-		popd > /dev/null
+		exeinto /usr/$(get_libdir)/opengl/amdgpu-pro/gbm
+		doexe usr/lib/x86_64-linux-gnu/amdgpu-pro/gbm/gbm_amdgpu.so
+		dosym gbm_amdgpu.so /usr/$(get_libdir)/opengl/amdgpu-pro/gbm/libdummy.so
+		dosym opengl/amdgpu-pro/gbm /usr/$(get_libdir)/gbm
+
+		exeinto /usr/$(get_libdir)/opengl/amdgpu-pro/extensions
+		doexe "usr/lib/x86_64-linux-gnu/amdgpu-pro/${XORG_VERS}/modules/extensions/libglx.so"
+
+		exeinto /usr/$(get_libdir)/opengl/amdgpu-pro/modules/drivers
+		doexe "usr/lib/x86_64-linux-gnu/amdgpu-pro/${XORG_VERS}/modules/drivers/amdgpu_drv.so"
+		# # TODO Do we need the amdgpu_drv.la file?
+
+		exeinto /usr/$(get_libdir)/opengl/amdgpu-pro/dri
+		doexe usr/lib/x86_64-linux-gnu/dri/amdgpu_dri.so
+		dosym ../opengl/amdgpu-pro/dri/amdgpu_dri.so /usr/$(get_libdir)/dri/amdgpu_dri.so
+		# Hack for libGL.so hardcoded directory path for amdgpu_dri.so
+		dosym ../../opengl/amdgpu-pro/dri/amdgpu_dri.so /usr/$(get_libdir)/x86_64-linux-gnu/dri/amdgpu_dri.so  # Hack to get X to started!
 
 		if use abi_x86_32 ; then
-			mkdir -p ./inst/usr/lib32/dri
-			mkdir -p ./inst/usr/$(get_libdir)/i386-linux-gnu/dri   # Hack to get X to started!
-			mkdir -p ./inst/usr/lib32/opengl/amdgpu-pro/{dri,gbm,lib}
+			exeinto /usr/lib32/opengl/amdgpu-pro/lib
+			doexe usr/lib/i386-linux-gnu/amdgpu-pro/libdrm_amdgpu.so.1.0.0
+			dosym libdrm_amdgpu.so.1.0.0 /usr/lib32/opengl/amdgpu-pro/lib/libdrm_amdgpu.so.1
+			dosym libdrm_amdgpu.so.1.0.0 /usr/lib32/opengl/amdgpu-pro/lib/libdrm_amdgpu.so
 
-			cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/libGL.so.1.2 ./inst/usr/lib32/opengl/amdgpu-pro/lib
-			cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/libdrm_amdgpu.so.1.0.0 ./inst/usr/lib32/opengl/amdgpu-pro/lib
-			cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/libgbm.so.1.0.0 ./inst/usr/lib32/opengl/amdgpu-pro/lib
-			cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/gbm/gbm_amdgpu.so ./inst/usr/lib32/opengl/amdgpu-pro/gbm
-			cp -a ./usr/lib/i386-linux-gnu/dri/amdgpu_dri.so ./inst/usr/lib32/opengl/amdgpu-pro/dri
-			chmod a+x ./inst/usr/lib32/opengl/amdgpu-pro/lib/{libGL.so.1.2,libdrm_amdgpu.so.1.0.0,libgbm.so.1.0.0}
-			chmod a+x ./inst/usr/lib32/opengl/amdgpu-pro/gbm/gbm_amdgpu.so
-			chmod a+x ./inst/usr/lib32/opengl/amdgpu-pro/dri/amdgpu_dri.so
+			doexe usr/lib/i386-linux-gnu/amdgpu-pro/libGL.so.1.2
+			dosym libGL.so.1.2 /usr/lib32/opengl/amdgpu-pro/lib/libGL.so.1
+			dosym libGL.so.1.2 /usr/lib32/opengl/amdgpu-pro/lib/libGL.so
 
-			pushd ./inst/usr/lib32/dri > /dev/null
-				ln -s ../opengl/amdgpu-pro/dri/amdgpu_dri.so amdgpu_dri.so
-				cd ..
-				ln -s ./opengl/amdgpu-pro/gbm gbm
-			popd > /dev/null
+			doexe usr/lib/i386-linux-gnu/amdgpu-pro/libgbm.so.1.0.0
+			dosym libgbm.so.1.0.0 /usr/lib32/opengl/amdgpu-pro/lib/libgbm.so.1
 
-			# Hack to get X to started!
-			pushd ./inst/usr/$(get_libdir)/i386-linux-gnu/dri > /dev/null
-				ln -s ../../../lib32/opengl/amdgpu-pro/dri/amdgpu_dri.so amdgpu_dri.so
-			popd > /dev/null
+			exeinto /usr/lib32/opengl/amdgpu-pro/gbm
+			doexe usr/lib/i386-linux-gnu/amdgpu-pro/gbm/gbm_amdgpu.so
+			dosym gbm_amdgpu.so /usr/lib32/opengl/amdgpu-pro/gbm/libdummy.so
+			dosym opengl/amdgpu-pro/gbm /usr/lib32/gbm
 
-			pushd ./inst/usr/lib32/opengl/amdgpu-pro/lib > /dev/null
-				ln -s libGL.so.1.2 libGL.so.1
-				ln -s libGL.so.1.2 libGL.so
-				ln -s libdrm_amdgpu.so.1.0.0 libdrm_amdgpu.so.1
-				ln -s libdrm_amdgpu.so.1.0.0 libdrm_amdgpu.so
-				ln -s libgbm.so.1.0.0 libgbm.so.1
-				cd ../gbm
-				ln -s gbm_amdgpu.so libdummy.so
-			popd > /dev/null
+			exeinto /usr/lib32/opengl/amdgpu-pro/dri
+			doexe usr/lib/i386-linux-gnu/dri/amdgpu_dri.so
+			dosym ../opengl/amdgpu-pro/dri/amdgpu_dri.so /usr/lib32/dri/amdgpu_dri.so
+			# Hack for libGL.so hardcoded directory path for amdgpu_dri.so
+			dosym ../../../lib32/opengl/amdgpu-pro/dri/amdgpu_dri.so /usr/$(get_libdir)/i386-linux-gnu/dri/amdgpu_dri.so  # Hack to get X to started!
 		fi
 	fi
 
 	# Copy the GLESv2 libs
 	if use gles2 ; then
-		cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/libGLESv2.so.2 ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib
-		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib/libGLESv2.so.2
-
-		pushd ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib > /dev/null
-			ln -s libGLESv2.so.2 libGLESv2.so
-		popd > /dev/null
+		exeinto /usr/$(get_libdir)/opengl/amdgpu-pro/lib
+		doexe usr/lib/x86_64-linux-gnu/amdgpu-pro/libGLESv2.so.2
+		dosym libGLESv2.so.2 /usr/$(get_libdir)/opengl/amdgpu-pro/lib/libGLESv2.so
 
 		if use abi_x86_32 ; then
-			cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/libGLESv2.so.2 ./inst/usr/lib32/opengl/amdgpu-pro/lib
-			chmod a+x ./inst/usr/lib32/opengl/amdgpu-pro/lib/libGLESv2.so.2
-
-			pushd ./inst/usr/lib32/opengl/amdgpu-pro/lib > /dev/null
-				ln -s libGLESv2.so.2 libGLESv2.so
-			popd > /dev/null
+			exeinto /usr/lib32/opengl/amdgpu-pro/lib
+			doexe usr/lib/i386-linux-gnu/amdgpu-pro/libGLESv2.so.2
+			dosym libGLESv2.so.2 /usr/lib32/opengl/amdgpu-pro/lib/libGLESv2.so
 		fi
 	fi
 
 	# Copy the EGL libs
-	cp -a ./usr/lib/x86_64-linux-gnu/amdgpu-pro/libEGL.so.1 ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib
-	chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib/libEGL.so.1
-
-	pushd ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/lib > /dev/null
-		ln -s libEGL.so.1 libEGL.so
-	popd > /dev/null
+	exeinto /usr/$(get_libdir)/opengl/amdgpu-pro/lib
+	doexe usr/lib/x86_64-linux-gnu/amdgpu-pro/libEGL.so.1
+	dosym libEGL.so.1 /usr/$(get_libdir)/opengl/amdgpu-pro/lib/libEGL.so
 
 	if use abi_x86_32 ; then
-		cp -a ./usr/lib/i386-linux-gnu/amdgpu-pro/libEGL.so.1 ./inst/usr/lib32/opengl/amdgpu-pro/lib
-		chmod a+x ./inst/usr/lib32/opengl/amdgpu-pro/lib/libEGL.so.1
-
-		pushd ./inst/usr/lib32/opengl/amdgpu-pro/lib > /dev/null
-			ln -s libEGL.so.1 libEGL.so
-		popd > /dev/null
+		exeinto /usr/lib32/opengl/amdgpu-pro/lib
+		doexe usr/lib/i386-linux-gnu/amdgpu-pro/libEGL.so.1
+		dosym libEGL.so.1 /usr/lib32/opengl/amdgpu-pro/lib/libEGL.so
 	fi
 
 	# Copy the VDPAU libs
 	if use vdpau ; then
-		mkdir -p ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/vdpau
-		mkdir -p ./inst/usr/$(get_libdir)/vdpau
-
-		cp -a ./usr/lib/x86_64-linux-gnu/vdpau/libvdpau_amdgpu.so.1.0.0 ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/vdpau
-		chmod a+x ./inst/usr/$(get_libdir)/opengl/amdgpu-pro/vdpau/libvdpau_amdgpu.so.1.0.0
-
-		pushd ./inst/usr/$(get_libdir)/vdpau > /dev/null
-			  ln -s ../opengl/amdgpu-pro/vdpau/libvdpau_amdgpu.so.1.0.0 libvdpau_amdgpu.so.1.0.0
-			  ln -s libvdpau_amdgpu.so.1.0.0 libvdpau_amdgpu.so.1.0
-			  ln -s libvdpau_amdgpu.so.1.0.0 libvdpau_amdgpu.so.1
-			  ln -s libvdpau_amdgpu.so.1.0.0 libvdpau_amdgpu.so
-		popd > /dev/null
+		exeinto /usr/$(get_libdir)/opengl/amdgpu-pro/vdpau
+		doexe usr/lib/x86_64-linux-gnu/vdpau/libvdpau_amdgpu.so.1.0.0
+		dosym ../opengl/amdgpu-pro/vdpau/libvdpau_amdgpu.so.1.0.0 /usr/$(get_libdir)/vdpau/libvdpau_amdgpu.so.1.0.0
+		dosym libvdpau_amdgpu.so.1.0.0 /usr/$(get_libdir)/vdpau/libvdpau_amdgpu.so.1.0
+		dosym libvdpau_amdgpu.so.1.0.0 /usr/$(get_libdir)/vdpau/libvdpau_amdgpu.so.1
+		dosym libvdpau_amdgpu.so.1.0.0 /usr/$(get_libdir)/vdpau/libvdpau_amdgpu.so
 	fi
 }
 
@@ -426,10 +402,10 @@ EOF
 	# popd > /dev/null
 # }
 
-src_install() {
-	cp -R -t "${D}" ./inst/* || die "Install failed!"
-	# dkms install -m amdgpu-pro -v ${BUILD_VER}
-}
+#src_install() {
+#	cp -R -t "${D}" ./inst/* || die "Install failed!"
+#	# dkms install -m amdgpu-pro -v ${BUILD_VER}
+#}
 
 pkg_prerm() {
 	einfo "pkg_prerm"
