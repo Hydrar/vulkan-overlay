@@ -10,8 +10,11 @@ inherit multilib-build unpacker
 
 DESCRIPTION="AMD precompiled drivers for Radeon Evergreen (HD5000 Series) and newer chipsets"
 HOMEPAGE="http://support.amd.com/en-us/kb-articles/Pages/AMDGPU-PRO-Beta-Driver-for-Vulkan-Release-Notes.aspx"
-BUILD_VER=16.20.3-294842
-SRC_URI="https://www2.ati.com/drivers/beta/amdgpu-pro_${BUILD_VER}.tar.xz"
+PKG_VER=16.20.3
+PKG_REV=294842
+PKG_VER_STRING=${PKG_VER}-${PKG_REV}
+BUILD_VER=${PKG_VER}.${PKG_REV}
+SRC_URI="https://www2.ati.com/drivers/beta/amdgpu-pro_${PKG_VER_STRING}.tar.xz"
 
 RESTRICT="fetch strip"
 
@@ -60,38 +63,38 @@ unpack_deb() {
 src_unpack() {
 	default
 
-	unpack_deb "./amdgpu-pro-driver/amdgpu-pro-core_${BUILD_VER}_amd64.deb"
-	unpack_deb "./amdgpu-pro-driver/amdgpu-pro-graphics_${BUILD_VER}_amd64.deb"
-	unpack_deb "./amdgpu-pro-driver/libdrm-amdgpu-pro-tools_${BUILD_VER}_amd64.deb"
+	unpack_deb "./amdgpu-pro-driver/amdgpu-pro-core_${PKG_VER_STRING}_amd64.deb"
+	unpack_deb "./amdgpu-pro-driver/amdgpu-pro-graphics_${PKG_VER_STRING}_amd64.deb"
+	unpack_deb "./amdgpu-pro-driver/libdrm-amdgpu-pro-tools_${PKG_VER_STRING}_amd64.deb"
 
 	if use opencl ; then
 		# Install the clinfo tool.
-		unpack_deb "./amdgpu-pro-driver/amdgpu-pro-clinfo_${BUILD_VER}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/amdgpu-pro-clinfo_${PKG_VER_STRING}_amd64.deb"
 
 		# Install the actual shared OpenCL lib - this uses the icd files to find the correct lib.
-		unpack_deb "./amdgpu-pro-driver/amdgpu-pro-libopencl1_${BUILD_VER}_amd64.deb"
-		unpack_deb "./amdgpu-pro-driver/amdgpu-pro-libopencl-dev_${BUILD_VER}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/amdgpu-pro-libopencl1_${PKG_VER_STRING}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/amdgpu-pro-libopencl-dev_${PKG_VER_STRING}_amd64.deb"
 
 		# Install the Installable Client Driver (ICD).
-		unpack_deb "./amdgpu-pro-driver/amdgpu-pro-opencl-icd_${BUILD_VER}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/amdgpu-pro-opencl-icd_${PKG_VER_STRING}_amd64.deb"
 
 		if use abi_x86_32 ; then
 			# Install the actual shared OpenCL lib - this uses the icd files to find the correct lib.
-			unpack_deb "./amdgpu-pro-driver/amdgpu-pro-libopencl1_${BUILD_VER}_i386.deb"
-			unpack_deb "./amdgpu-pro-driver/amdgpu-pro-libopencl-dev_${BUILD_VER}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/amdgpu-pro-libopencl1_${PKG_VER_STRING}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/amdgpu-pro-libopencl-dev_${PKG_VER_STRING}_i386.deb"
 
 			# Install the Installable Client Driver (ICD).
-			unpack_deb "./amdgpu-pro-driver/amdgpu-pro-opencl-icd_${BUILD_VER}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/amdgpu-pro-opencl-icd_${PKG_VER_STRING}_i386.deb"
 		fi
 	fi
 
 	if use vulkan ; then
 		# Install the actual vulkan ICD.
-		unpack_deb "./amdgpu-pro-driver/amdgpu-pro-vulkan-driver_${BUILD_VER}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/amdgpu-pro-vulkan-driver_${PKG_VER_STRING}_amd64.deb"
 
 		if use abi_x86_32 ; then
 			# Install the actual vulkan ICD.
-			unpack_deb "./amdgpu-pro-driver/amdgpu-pro-vulkan-driver_${BUILD_VER}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/amdgpu-pro-vulkan-driver_${PKG_VER_STRING}_i386.deb"
 		fi
 
 		#chmod -x ./etc/vulkan/icd.d/*
@@ -99,61 +102,61 @@ src_unpack() {
 	fi
 
 	if use opengl ; then
-		unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dev_${BUILD_VER}_amd64.deb"
-		unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dri_${BUILD_VER}_amd64.deb"
-		unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-glx_${BUILD_VER}_amd64.deb"
-		unpack_deb "./amdgpu-pro-driver/libdrm-amdgpu-pro-amdgpu1_${BUILD_VER}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dev_${PKG_VER_STRING}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dri_${PKG_VER_STRING}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-glx_${PKG_VER_STRING}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/libdrm-amdgpu-pro-amdgpu1_${PKG_VER_STRING}_amd64.deb"
 
 		# Install the Generic Buffer Management (BGM) library
 		# TODO: This is going to require that the eselect program moves the gbm libs
-		unpack_deb "./amdgpu-pro-driver/libgbm1-amdgpu-pro_${BUILD_VER}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/libgbm1-amdgpu-pro_${PKG_VER_STRING}_amd64.deb"
 
 		if use abi_x86_32 ; then
-			unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dev_${BUILD_VER}_i386.deb"
-			unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dri_${BUILD_VER}_i386.deb"
-			unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-glx_${BUILD_VER}_i386.deb"
-			unpack_deb "./amdgpu-pro-driver/libdrm-amdgpu-pro-amdgpu1_${BUILD_VER}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dev_${PKG_VER_STRING}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-dri_${PKG_VER_STRING}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/libgl1-amdgpu-pro-glx_${PKG_VER_STRING}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/libdrm-amdgpu-pro-amdgpu1_${PKG_VER_STRING}_i386.deb"
 
 			# Install the Generic Buffer Management (BGM) library
 			# TODO: This is going to require that the eselect program moves the gbm libs
-			unpack_deb "./amdgpu-pro-driver/libgbm1-amdgpu-pro_${BUILD_VER}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/libgbm1-amdgpu-pro_${PKG_VER_STRING}_i386.deb"
 		fi
 	fi
 
 	if use gles2 ; then
-		unpack_deb "./amdgpu-pro-driver/libgles2-amdgpu-pro_${BUILD_VER}_amd64.deb"
-		unpack_deb "./amdgpu-pro-driver/libgles2-amdgpu-pro-dev_${BUILD_VER}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/libgles2-amdgpu-pro_${PKG_VER_STRING}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/libgles2-amdgpu-pro-dev_${PKG_VER_STRING}_amd64.deb"
 
 		if use abi_x86_32 ; then
-			unpack_deb "./amdgpu-pro-driver/libgles2-amdgpu-pro_${BUILD_VER}_i386.deb"
-			unpack_deb "./amdgpu-pro-driver/libgles2-amdgpu-pro-dev_${BUILD_VER}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/libgles2-amdgpu-pro_${PKG_VER_STRING}_i386.deb"
+			unpack_deb "./amdgpu-pro-driver/libgles2-amdgpu-pro-dev_${PKG_VER_STRING}_i386.deb"
 		fi
 	fi
 
 	# Install the EGL libs
-	unpack_deb "./amdgpu-pro-driver/libegl1-amdgpu-pro_${BUILD_VER}_amd64.deb"
-	unpack_deb "./amdgpu-pro-driver/libegl1-amdgpu-pro-dev_${BUILD_VER}_amd64.deb"
+	unpack_deb "./amdgpu-pro-driver/libegl1-amdgpu-pro_${PKG_VER_STRING}_amd64.deb"
+	unpack_deb "./amdgpu-pro-driver/libegl1-amdgpu-pro-dev_${PKG_VER_STRING}_amd64.deb"
 
 	if use abi_x86_32 ; then
-		unpack_deb "./amdgpu-pro-driver/libegl1-amdgpu-pro_${BUILD_VER}_i386.deb"
-		unpack_deb "./amdgpu-pro-driver/libegl1-amdgpu-pro-dev_${BUILD_VER}_i386.deb"
+		unpack_deb "./amdgpu-pro-driver/libegl1-amdgpu-pro_${PKG_VER_STRING}_i386.deb"
+		unpack_deb "./amdgpu-pro-driver/libegl1-amdgpu-pro-dev_${PKG_VER_STRING}_i386.deb"
 	fi
 
 	if use vdpau ; then
-		unpack_deb "./amdgpu-pro-driver/libvdpau-amdgpu-pro_${BUILD_VER}_amd64.deb"
+		unpack_deb "./amdgpu-pro-driver/libvdpau-amdgpu-pro_${PKG_VER_STRING}_amd64.deb"
 
 		# No x86 version of this lib for some reason.
 	fi
 
 	# Install the X modules. No x86 version of this lib for some reason.
-	unpack_deb "./amdgpu-pro-driver/xserver-xorg-video-amdgpu-pro_${BUILD_VER}_amd64.deb"
+	unpack_deb "./amdgpu-pro-driver/xserver-xorg-video-amdgpu-pro_${PKG_VER_STRING}_amd64.deb"
 
 	# Install the DKMS sources.
-	# unpack_deb "./amdgpu-pro-driver/amdgpu-pro-dkms_${BUILD_VER}_all.deb"
+	# unpack_deb "./amdgpu-pro-driver/amdgpu-pro-dkms_${PKG_VER_STRING}_all.deb"
 }
 
 src_prepare() {
-	# pushd ./usr/src/amdgpu-pro-${BUILD_VER} > /dev/null
+	# pushd ./usr/src/amdgpu-pro-${PKG_VER_STRING} > /dev/null
 	# 	epatch "${FILESDIR}"/0001-Make-the-script-find-the-correct-system-map-file.patch
 	# 	epatch "${FILESDIR}"/0002-Add-in-Gentoo-as-an-option-for-the-OS-otherwise-it-w.patch
 	# 	epatch "${FILESDIR}"/0003-Fixed-API-changes-in-the-kernel.-Should-still-compil.patch
@@ -370,10 +373,10 @@ src_install() {
 # 	einfo "Compile the DKMS source."
 
 	# Build the DKMS source. ${KV_FULL}
-	#cp -R ./usr/src/amdgpu-pro-${BUILD_VER} /usr/src/
-	# einfo "dkms add -m amdgpu-pro -v ${BUILD_VER} ./usr/src/amdgpu-pro-${BUILD_VER}"
-	# dkms add -m amdgpu-pro -v ${BUILD_VER} ./usr/src/amdgpu-pro-${BUILD_VER}
-	# dkms build -m amdgpu-pro -v ${BUILD_VER}
+	#cp -R ./usr/src/amdgpu-pro-${PKG_VER_STRING} /usr/src/
+	# einfo "dkms add -m amdgpu-pro -v ${PKG_VER_STRING} ./usr/src/amdgpu-pro-${PKG_VER_STRING}"
+	# dkms add -m amdgpu-pro -v ${PKG_VER_STRING} ./usr/src/amdgpu-pro-${PKG_VER_STRING}
+	# dkms build -m amdgpu-pro -v ${PKG_VER_STRING}
 
 # 	pushd ./usr/src/amdgpu-pro-16.20.3-294842 > /dev/null
 
@@ -404,7 +407,7 @@ src_install() {
 
 #src_install() {
 #	cp -R -t "${D}" ./inst/* || die "Install failed!"
-#	# dkms install -m amdgpu-pro -v ${BUILD_VER}
+#	# dkms install -m amdgpu-pro -v ${PKG_VER_STRING}
 #}
 
 pkg_prerm() {
@@ -417,7 +420,7 @@ pkg_prerm() {
 		"${ROOT}"/usr/bin/eselect opencl set --use-old mesa
 	fi
 
-	# dkms remove -m amdgpu -v ${BUILD_VER} -k ${KV_FULL}
+	# dkms remove -m amdgpu -v ${PKG_VER_STRING} -k ${KV_FULL}
 }
 
 pkg_postinst() {
