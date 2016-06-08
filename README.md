@@ -56,6 +56,14 @@ Installs the developer man pages and the API specification (in PDF form).
 
 N.B: I really wasn't sure which category this should go into.
 
+### dev-util/spirv-tools
+
+The SPIR-V assembler, disassembler and validator tools from Khronos.
+
+### dev-util/glslang
+
+glslan -> SPIR-V compiler and spirv-remap tool from Khronos.
+
 ## Vulkan
 
 IMPORTANT! To get Vulkan to work, you need to set DRI to 3! i.e. my ```/etc/X11/xorg.conf.d/10-device.conf```:
