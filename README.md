@@ -68,6 +68,10 @@ glslang -> SPIR-V compiler and spirv-remap tool from Khronos.
 
 Google's GLSL -> SPIR-V compiler.
 
+### dev-util/spirv-cross
+
+Tool for converting between SPIR-V <-> high level languages.
+
 ## Vulkan
 
 IMPORTANT! To get Vulkan to work, you need to set DRI to 3! i.e. my ```/etc/X11/xorg.conf.d/10-device.conf```:
