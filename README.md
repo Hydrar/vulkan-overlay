@@ -62,7 +62,11 @@ The SPIR-V assembler, disassembler and validator tools from Khronos.
 
 ### dev-util/glslang
 
-glslan -> SPIR-V compiler and spirv-remap tool from Khronos.
+glslang -> SPIR-V compiler and spirv-remap tool from Khronos.
+
+### dev-util/shaderc
+
+Google's GLSL -> SPIR-V compiler.
 
 ## Vulkan
 
