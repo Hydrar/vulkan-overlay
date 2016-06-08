@@ -72,11 +72,12 @@ src_install() {
 	# prefix the tri and cube examples
 	#mv "${S}"/sdk/build/demos/cube "${S}"/sdk/build/demos/vulkancube
 	#mv "${S}"/sdk/build/demos/tri "${S}"/sdk/build/demos/vulkantri
-	cp -a "${S}"/sdk/build/demos/cube* "${D}"/{etc,usr/share}/vulkan/demos/cube
-	cp -a "${S}"/sdk/demos/cube.{c,vert,frag} "${D}"/{etc,usr/share}/vulkan/demos/cube
-	cp -a "${S}"/sdk/build/demos/tri* "${D}"/{etc,usr/share}/vulkan/demos/tri
-	cp -a "${S}"/sdk/demos/tri.{c,vert,frag} "${D}"/{etc,usr/share}/vulkan/demos/tri
-	cp -a "${S}"/sdk/build/demos/smoketest "${D}"/{etc,usr/share}/vulkan/demos/smoke
+	cp -a "${S}"/sdk/build/demos/cube* "${D}"/usr/share/vulkan/demos/cube
+	cp -a "${S}"/sdk/demos/cube.{c,vert,frag} "${D}"/usr/share/vulkan/demos/cube
+	cp -a "${S}"/sdk/demos/lunarg.ppm "${D}"/usr/share/vulkan/demos/cube
+	cp -a "${S}"/sdk/build/demos/tri* "${D}"/usr/share/vulkan/demos/tri
+	cp -a "${S}"/sdk/demos/tri.{c,vert,frag} "${D}"/usr/share/vulkan/demos/tri
+	cp -a "${S}"/sdk/build/demos/smoketest "${D}"/usr/share/vulkan/demos/smoke
 	#dobin "${S}"/sdk/build/demos/vulkan{info,cube,tri}
 	dobin "${S}"/sdk/build/demos/vulkaninfo
 	#dobin "${S}"/spirv-tools/build/tools/spirv-*
