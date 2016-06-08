@@ -84,12 +84,10 @@ TODO: Add this into the base config.
 
 This what I really want to happen:
 
-1. Add a GLSL tools ebuild.
-2. Add a SPIR-V tools ebuild.
-3. Separate the above from the Vulkan SDK ebuild.
-4. Make the ebuild's use the cmake-utils.eclass.
-5. Fix the demos from the SDK, probably a layer issue, i.e. cannot find them.
-6. Add any further samples.
+1. Separate the above from the Vulkan SDK ebuild.
+2. Make the ebuild's use the cmake-utils.eclass.
+3. Fix the demos from the SDK, probably a layer issue, i.e. cannot find them.
+4. Add any further samples.
 
 ## Results
 
