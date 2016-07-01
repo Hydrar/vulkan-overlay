@@ -1,0 +1,29 @@
+From 2845356f401862fa331155ecab13b423ee029b0c Mon Sep 17 00:00:00 2001
+From: "Luke A. Guest" <laguest@archeia.com>
+Date: Fri, 1 Jul 2016 12:01:31 +0100
+Subject: [PATCH 4/7] Change vblank_disable_allowed ->
+ vblank_disable_immediate, changed between 4.6 and 4.7.
+
+---
+ amd/amdgpu/amdgpu_irq.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/amd/amdgpu/amdgpu_irq.c b/amd/amdgpu/amdgpu_irq.c
+index d13865a..5cfa69f 100644
+--- a/amd/amdgpu/amdgpu_irq.c
++++ b/amd/amdgpu/amdgpu_irq.c
+@@ -240,7 +240,11 @@ int amdgpu_irq_init(struct amdgpu_device *adev)
+ 		INIT_WORK(&adev->hotplug_work,
+ 				amdgpu_hotplug_work_func);
+ 	}
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 7, 0)
++	adev->ddev->vblank_disable_immediate = true;
++#else
+ 	adev->ddev->vblank_disable_allowed = true;
++#endif
+ 
+ 	INIT_WORK(&adev->reset_work, amdgpu_irq_reset_work_func);
+ 
+-- 
+2.7.3
+
