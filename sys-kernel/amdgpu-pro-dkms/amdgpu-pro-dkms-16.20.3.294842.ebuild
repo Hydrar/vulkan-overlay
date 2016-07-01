@@ -47,10 +47,11 @@ src_prepare() {
 	unpack_deb "./amdgpu-pro-driver/amdgpu-pro-dkms_${BUILD_VER}_all.deb"
 
 	pushd ./usr/src/amdgpu-pro-${BUILD_VER} > /dev/null
-		epatch "${FILESDIR}"/0001-Make-the-script-find-the-correct-system-map-file.patch
-		epatch "${FILESDIR}"/0002-Add-in-Gentoo-as-an-option-for-the-OS-otherwise-it-w.patch
-		epatch "${FILESDIR}"/0003-Fixed-API-changes-in-the-kernel.-Should-still-compil.patch
-		epatch "${FILESDIR}"/0004-GCC-won-t-compile-any-static-inline-function-with-va.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0001-Make-the-script-find-the-correct-system-map-file.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0002-Add-in-Gentoo-as-an-option-for-the-OS-otherwise-it-w.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0003-Fixed-API-changes-in-the-kernel.-Should-still-compil.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0004-GCC-won-t-compile-any-static-inline-function-with-va.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0005-Fix-placement-of-module.patch
 	popd > /dev/null
 
 	mkdir -p ./inst/usr/src
