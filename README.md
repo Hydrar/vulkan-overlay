@@ -40,10 +40,16 @@ auto-sync = no
 
 This is the set of libraries, GL, EGL, GLX, GBM, Vulkan, OpenCL, VDPAU, etc.
 
+* amdgpu-pro-driver-16.20.3 tested on 4.6.0-rc7 and most of the other RC's.
+* amdgpu-pro-driver-16.30.3-306809 tested on 4.7.0-rc5, segfaults on trying to start X.
+  - This uses the new LRU stuff in the ttm_bo_driver which is not in kernels below 4.7.
+
 ### sys-kernel/amdgpu-pro-dkms
 
 This is the kernel module source for the hybrid stack, this has extra ioctl's that are required for the rest of the
 stack. Tested on 4.6-rc7. The X log indicates that the kernel module is working.
+
+* Version tests, as above for the drivers.
 
 ### media-libs/vulkan-base
 
