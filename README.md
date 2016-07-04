@@ -105,7 +105,24 @@ This what I really want to happen:
 
 ## Results
 
+The most stable combination I've managed to find so far was 4.6.0-rc7 using amdgpu-pro-dkms-16.20.3.294842.
+
 From the [16.20.3-294842](docs/results_16.20.3-294842.md) drivers.
+
+### Stock kernels
+
+The Stock kernel module (non-pro) with the x11-drivers 16.20.3-294842 alone does not work properly as Vulkan does not
+work at all.
+
+Using the stock kernels of 4.6.x have proven to be flaky as the standard AMDGPU driver hangs when playing videos. This
+may have been due to Pulse not running, I need to try this again.
+
+The current amdgpu-pro-dkms-16.30.3.306809 does not compile without patches to remove the LRU stuff which is in 4.7 and
+above, when it does compile, I get nothing on screen with the 4.6.x kernels, with the 4.7.0-rc kernels it segfaults on
+starting X.
+
+I am currently running 4.7.0-rc5 with the stock kernel module (non-pro) and 16.20.3-294842 x11-drivers, the cube and
+triangle Vulkan demos work, the smoketest does not. Dota 2 does run in Vulkan mode.
 
 ## Contributions
 
