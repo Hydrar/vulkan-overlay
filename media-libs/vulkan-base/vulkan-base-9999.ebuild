@@ -21,12 +21,15 @@ DEPEND="dev-util/cmake
 src_unpack() {
 	git-r3_fetch "https://github.com/KhronosGroup/glslang.git"
 	git-r3_fetch "https://github.com/KhronosGroup/SPIRV-Tools.git"
+	git-r3_fetch "https://github.com/KhronosGroup/SPIRV-Headers.git"
 	git-r3_fetch ${EGIT_REPO_URI}
 
 	git-r3_checkout https://github.com/KhronosGroup/glslang.git \
 		"${S}"/glslang
 	git-r3_checkout https://github.com/KhronosGroup/SPIRV-Tools.git \
 		"${S}"/spirv-tools
+	git-r3_checkout https://github.com/KhronosGroup/SPIRV-Headers.git \
+		"${S}"/spirv-tools/external/spirv-headers
 	git-r3_checkout ${EGIT_REPO_URI} "${S}"/sdk
 }
 
@@ -84,6 +87,7 @@ src_install() {
 
 	# header files
 	cp -R "${S}"/sdk/include/vulkan "${D}"/usr/include
+	cp -R "${S}"/spirv-tools/external/spirv-headers/include/spirv "${D}"/usr/include
 
 	# vulkan loader lib
 	dolib.so "${S}"/sdk/build/loader/lib*.so*
