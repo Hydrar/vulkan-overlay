@@ -100,8 +100,7 @@ This what I really want to happen:
 
 1. Separate the above from the Vulkan SDK ebuild.
 2. Make the ebuild's use the cmake-utils.eclass.
-3. Fix the demos from the SDK, probably a layer issue, i.e. cannot find them.
-4. Add any further samples.
+3. Add any further samples.
 
 ## Results
 
@@ -117,12 +116,19 @@ work at all.
 Using the stock kernels of 4.6.x have proven to be flaky as the standard AMDGPU driver hangs when playing videos. This
 may have been due to Pulse not running, I need to try this again.
 
-The current amdgpu-pro-dkms-16.30.3.306809 does not compile without patches to remove the LRU stuff which is in 4.7 and
-above, when it does compile, I get nothing on screen with the 4.6.x kernels, with the 4.7.0-rc kernels it
-[segfaults on starting X](docs/4.7.0-rc5_dkms_16.30.3-306809_crash.png).
+I have recompiled the amdgpu-pro-dkms-16.30.3.306809 source and patched again for 4.6.3 and then 4.7-rc5, the former
+now works, but the latter still segfaults.
 
-I am currently running 4.7.0-rc5 with the stock kernel module (non-pro) and 16.20.3-294842 x11-drivers, the cube and
-triangle Vulkan demos work, the smoketest does not. Dota 2 does run in Vulkan mode.
+I am currently running 4.6.3-gentoo with the stock kernel module (non-pro) and 16.20.3-294842 x11-drivers, the cube and
+triangle Vulkan demos work, the smoketest does not, exiting with:
+
+```bash
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  failed to find any capable Vulkan physical device
+Aborted
+```
+
+Dota 2 does run in Vulkan mode.
 
 ## Contributions
 
