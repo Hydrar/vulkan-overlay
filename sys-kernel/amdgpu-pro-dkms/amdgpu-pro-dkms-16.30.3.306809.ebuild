@@ -47,13 +47,15 @@ src_prepare() {
 	unpack_deb "./amdgpu-pro-driver/amdgpu-pro-dkms_${BUILD_VER}_all.deb"
 
 	pushd ./usr/src/amdgpu-pro-${BUILD_VER} > /dev/null
-		epatch "${FILESDIR}"/${BUILD_VER}/0001-Make-the-script-find-the-correct-system-map-file.patch
-		epatch "${FILESDIR}"/${BUILD_VER}/0002-Add-in-Gentoo-as-an-option-for-the-OS-otherwise-it-w.patch
-		epatch "${FILESDIR}"/${BUILD_VER}/0003-Fix-paging-changes-between-kernel-versions.patch
-		epatch "${FILESDIR}"/${BUILD_VER}/0004-Change-vblank_disable_allowed-vblank_disable_immedia.patch
-		epatch "${FILESDIR}"/${BUILD_VER}/0005-Extra-parameter-removed-from-ttm_bo_reserve-from-4.7.patch
-		epatch "${FILESDIR}"/${BUILD_VER}/0006-Fixed-location-of-kernel-module-from-dkms.patch
-		epatch "${FILESDIR}"/${BUILD_VER}/0007-First-parameter-removed-from-drm_gem_object_lookup-a.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0001-Find-the-correct-System.map-file.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0002-Add-Gentoo-as-an-OS-option-otherwise-it-won-t-build.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0003-Fixed-kernel-module-installation-location-using-dkms.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0004-Fix-paging-changes-between-kernel-versions.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0005-LRU-stuff-isn-t-available-until-4.7.x.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0006-Extra-parameter-removed-from-ttm_bo_reserve-for-4.7..patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0007-Change-name-of-vblank_disable_allowed-to-vblank_disa.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0008-First-parameter-removed-from-drm_gem_object_lookup-i.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0009-Remove-connector-parameter-from-__drm_atomic_helper_.patch
 	popd > /dev/null
 
 	mkdir -p ./inst/usr/src
