@@ -41,8 +41,8 @@ RDEPEND="
 	sys-kernel/amdgpu-pro-dkms
 "
 DEPEND="
-	>=sys-firmware/amdgpu-ucode-20160628
 "
+#	>=sys-firmware/amdgpu-ucode-20160628
 #	>=sys-kernel/amdgpu-pro-dkms-16.30.3.306809
 
 S="${WORKDIR}"
