@@ -38,10 +38,10 @@ RDEPEND="
 	x11-proto/xf86miscproto
 	x11-proto/xf86vidmodeproto
 	x11-proto/xineramaproto
-	sys-kernel/amdgpu-pro-dkms
 "
 DEPEND="
 	=x11-libs/libdrm-2.4.66-r1
+	=sys-kernel/amdgpu-pro-dkms-${BUILD_VER}
 "
 
 S="${WORKDIR}"

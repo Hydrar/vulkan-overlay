@@ -38,9 +38,10 @@ RDEPEND="
 	x11-proto/xf86miscproto
 	x11-proto/xf86vidmodeproto
 	x11-proto/xineramaproto
-	sys-kernel/amdgpu-pro-dkms
 "
-DEPEND=""
+DEPEND="
+	=sys-kernel/amdgpu-pro-dkms-${BUILD_VER}
+"
 
 S="${WORKDIR}"
 
