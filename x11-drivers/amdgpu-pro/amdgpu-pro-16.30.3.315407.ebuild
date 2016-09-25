@@ -309,7 +309,7 @@ src_install() {
 		doexe usr/lib/x86_64-linux-gnu/dri/amdgpu_dri.so
 		dosym ../opengl/amdgpu-pro/dri/amdgpu_dri.so /usr/$(get_libdir)/dri/amdgpu_dri.so
 		# Hack for libGL.so hardcoded directory path for amdgpu_dri.so
-		# dosym ../../opengl/amdgpu-pro/dri/amdgpu_dri.so /usr/$(get_libdir)/x86_64-linux-gnu/dri/amdgpu_dri.so  # Hack to get X to started!
+		dosym ../../opengl/amdgpu-pro/dri/amdgpu_dri.so /usr/$(get_libdir)/x86_64-linux-gnu/dri/amdgpu_dri.so  # Hack to get X to started!
 
 		if use abi_x86_32 ; then
 			exeinto /usr/lib32/opengl/amdgpu-pro/lib
@@ -333,7 +333,7 @@ src_install() {
 			doexe usr/lib/i386-linux-gnu/dri/amdgpu_dri.so
 			dosym ../opengl/amdgpu-pro/dri/amdgpu_dri.so /usr/lib32/dri/amdgpu_dri.so
 			# Hack for libGL.so hardcoded directory path for amdgpu_dri.so
-			# dosym ../../../lib32/opengl/amdgpu-pro/dri/amdgpu_dri.so /usr/$(get_libdir)/i386-linux-gnu/dri/amdgpu_dri.so  # Hack to get X to started!
+			dosym ../../../lib32/opengl/amdgpu-pro/dri/amdgpu_dri.so /usr/$(get_libdir)/i386-linux-gnu/dri/amdgpu_dri.so  # Hack to get X to started!
 		fi
 	fi
 
