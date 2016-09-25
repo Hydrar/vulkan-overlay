@@ -61,6 +61,7 @@ src_prepare() {
 		epatch "${FILESDIR}"/${BUILD_VER}/0012-Fix-crtc_gamma-functions-for-4.8.0.patch
 		epatch "${FILESDIR}"/${BUILD_VER}/0013-Fix-drm_atomic_helper_swap_state-for-4.8.0.patch
 		epatch "${FILESDIR}"/${BUILD_VER}/0014-Fix-bo-priv_flags-for-4.8.0.patch
+		epatch "${FILESDIR}"/${BUILD_VER}/0015-Add-extra-flag-to-ttm_bo_move_ttm-for-4.8.0-rc2.patch
 	popd > /dev/null
 
 	mkdir -p ./inst/usr/src
