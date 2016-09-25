@@ -42,6 +42,8 @@ This is the set of libraries, GL, EGL, GLX, GBM, Vulkan, OpenCL, VDPAU, etc.
 
 ### x11-libs/libdrm
 
+This is the userspace DRM library that the varous graphics API's call, this library then calls the kernel API's.
+
 To get this package to work on my machine, I've had to downgrade a lot of packages due to the libdrm supplied by AMD
 being based on 2.4.66 and not having a full set of drivers in there.
 
@@ -75,7 +77,8 @@ On this ebuild, there is a new USE flag *vkheaders*, use this if you have no hea
 This is a custom Mesa based on upstream/master and includes Dave Airlie's RADV driver for testing. This also installs
 Vulkan headers.
 
-** This cannot be installed at the same time as AMDGPU-Pro due to AMD's libdrm being too old.
+** This cannot be installed at the same time as AMDGPU-Pro due to AMD's libdrm being too old. You will need the
+libdrm-9999 package in this repository.
 
 ### app-misc/vulkan-docs
 
