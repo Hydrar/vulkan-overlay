@@ -75,6 +75,8 @@ On this ebuild, there is a new USE flag *vkheaders*, use this if you have no hea
 This is a custom Mesa based on upstream/master and includes Dave Airlie's RADV driver for testing. This also installs
 Vulkan headers.
 
+** This cannot be installed at the same time as AMDGPU-Pro due to AMD's libdrm being too old.
+
 ### app-misc/vulkan-docs
 
 Installs the developer man pages and the API specification (in PDF form).
