@@ -10,13 +10,14 @@ SRC_URI=""
 EGIT_REPO_URI="https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers.git"
 
 LICENSE="MIT"
-IUSE=""
+IUSE="vkheaders"
 SLOT="0"
 
 KEYWORDS="~amd64"
 
 DEPEND="dev-util/cmake
 	>=dev-lang/python-3"
+#	=media-libs/mesa-9999
 
 src_unpack() {
 	git-r3_fetch "https://github.com/KhronosGroup/glslang.git"
@@ -60,6 +61,7 @@ src_compile() {
 		-DBUILD_TESTS=OFF		\
 		-DSPIRV_TOOLS_LIB=${S}/spirv-tools/build/tools \
 		-DGLSLANG_VALIDATOR=${S}/glslang/build/install/bin/glslangValidator	\
+		-DCMAKE_BUILD_TYPE=Debug \
 		-H. -Bbuild
 	cd "${S}"/sdk/build
 	emake || die "cannot build Vulkan Loader"
@@ -86,7 +88,11 @@ src_install() {
 	#dobin "${S}"/spirv-tools/build/tools/spirv-*
 
 	# header files
-	cp -R "${S}"/sdk/include/vulkan "${D}"/usr/include
+	# Vulkan headers already installed by Mesa.
+	if use vkheaders ; then
+		cp -R "${S}"/sdk/include/vulkan "${D}"/usr/include
+	fi
+
 	cp -R "${S}"/spirv-tools/external/spirv-headers/include/spirv "${D}"/usr/include
 
 	# vulkan loader lib
