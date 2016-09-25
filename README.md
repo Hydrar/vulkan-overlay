@@ -40,21 +40,40 @@ auto-sync = no
 
 This is the set of libraries, GL, EGL, GLX, GBM, Vulkan, OpenCL, VDPAU, etc.
 
-* amdgpu-pro-driver-16.20.3 tested on 4.6.0-rc7 and most of the other RC's.
-* amdgpu-pro-driver-16.30.3-306809 tested on 4.7.0-rc5, segfaults on trying to start X.
-  - This uses the new LRU stuff in the ttm_bo_driver which is not in kernels below 4.7.
+### x11-libs/libdrm
+
+To get this package to work on my machine, I've had to downgrade a lot of packages due to the libdrm supplied by AMD
+being based on 2.4.66 and not having a full set of drivers in there.
+
+In your `/etc/portage/make.conf` file, set `VIDEO_CARDS="amdgpu"`, radeon and radeonsi won't let mesa build with this
+package. If you want to complain about this, aim your complaints at AMD and tell them to release the source or patches
+to libdrm so I can just provide a custom source ebuild.
+
 
 ### sys-kernel/amdgpu-pro-dkms
 
 This is the kernel module source for the hybrid stack, this has extra ioctl's that are required for the rest of the
-stack. Tested on 4.6-rc7. The X log indicates that the kernel module is working.
+stack.
 
-* Version tests, as above for the drivers.
+* Build 16.30.3-315407 tested on:
+  - 4.7.4-gentoo
+  - 4.8.0-rc1
+* Build 16.30.3-315407-r1 for >=sys-kernel/git-sources-4.8-rc2
+
+DAL doesn't work here, R9 390, add `amdgpu.dal=0` to your kernel command line if you get crashes. A quick way to test
+this is to go to a terminal on boot (not X) and swtich between two and if it hangs, enable the above command line option.
 
 ### media-libs/vulkan-base
 
 This installs a basic SDK, taken from [here](https://bugs.gentoo.org/show_bug.cgi?id=574886), it's the v2 ebuild. It's
 a start, but it needs a lot more work. See below.
+
+On this ebuild, there is a new USE flag *vkheaders*, use this if you have no header conflicts with other packages.
+
+### media-libs/mesa
+
+This is a custom Mesa based on upstream/master and includes Dave Airlie's RADV driver for testing. This also installs
+Vulkan headers.
 
 ### app-misc/vulkan-docs
 
