@@ -10,8 +10,8 @@ inherit xorg-2
 DESCRIPTION="X.Org libdrm library (with amdgpu-pro patches)"
 HOMEPAGE="https://dri.freedesktop.org/"
 if [[ ${PV} = 9999* ]]; then
-#	EGIT_REPO_URI="git@github.com:Lucretia/libdrm-amdgpu.git"
-	EGIT_REPO_URI="/home/laguest/src/others/vulkan-stuff/mine/libdrm-amdgpu"
+	EGIT_REPO_URI="git@github.com:Lucretia/libdrm-amdgpu.git"
+#	EGIT_REPO_URI="/home/laguest/src/others/vulkan-stuff/mine/libdrm-amdgpu"
 	EGIT_BRANCH="add_missing_ioctls"
 	KEYWORDS=""
 else
