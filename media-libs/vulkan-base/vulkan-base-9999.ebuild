@@ -113,7 +113,7 @@ src_install() {
 
 	# point linker to newly created vulkan layer libs
 	cat << EOF > "${D}"/etc/env.d/89vulkan
-LDPATH="/usr/$(get_libdir)/vulkan;"
+LDPATH="/usr/$(get_libdir)/vulkan:"
 EOF
 }
 
