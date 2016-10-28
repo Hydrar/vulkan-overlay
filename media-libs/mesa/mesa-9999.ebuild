@@ -6,9 +6,10 @@ EAPI=5
 
 #EGIT_REPO_URI="https://github.com/airlied/mesa.git"
 #EGIT_BRANCH="semi-interesting"
-EGIT_REPO_URI="https://github.com/Lucretia/mesa-amdgpu.git"
+#EGIT_REPO_URI="https://github.com/Lucretia/mesa-amdgpu.git"
 #EGIT_REPO_URI="/home/laguest/src/others/vulkan-stuff/mine/mesa-amdgpu"
-EGIT_BRANCH="amdgpu/radv-new"
+#EGIT_BRANCH="amdgpu/radv-new"
+EGIT_REPO_URI="git://anongit.freedesktop.org/mesa/mesa"
 
 if [[ ${PV} = 9999 ]]; then
 	GIT_ECLASS="git-r3"
